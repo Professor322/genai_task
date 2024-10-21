@@ -2,8 +2,10 @@ import numpy as np
 import torch as th
 
 from .gaussian_diffusion import GaussianDiffusion
+from ..diffusion_models import diffusion_models_registry
 
 
+@diffusion_models_registry.add_to_registry(name="space_timesteps")
 def space_timesteps(num_timesteps, section_counts):
     """
     Create a list of timesteps to use from an original diffusion process,
@@ -60,6 +62,7 @@ def space_timesteps(num_timesteps, section_counts):
     return set(all_steps)
 
 
+@diffusion_models_registry.add_to_registry(name="spaced_diffusion")
 class SpacedDiffusion(GaussianDiffusion):
     """
     A diffusion process which can skip steps in a base diffusion process.

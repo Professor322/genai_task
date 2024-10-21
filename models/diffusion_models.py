@@ -7,6 +7,20 @@ from utils.class_registry import ClassRegistry
 
 diffusion_models_registry = ClassRegistry()
 
+# add stuff from improved diffusion to the registry
+from .improved_diffusion.unet import UNetModel
+from .improved_diffusion.gaussian_diffusion import (
+    get_named_beta_schedule,
+    ModelMeanType,
+    ModelVarType,
+    LossType,
+)
+from .improved_diffusion.respace import (
+    SpacedDiffusion,
+    space_timesteps
+)
+
+from .improved_diffusion.scheduler import UniformSampler
 
 class VerySimpleUnetBlock(nn.Module):
     def __init__(self, in_channels, out_channels):

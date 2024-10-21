@@ -13,8 +13,10 @@ import torch as th
 
 from .nn import mean_flat
 from .losses import normal_kl, discretized_gaussian_log_likelihood
+from ..diffusion_models import diffusion_models_registry
 
 
+@diffusion_models_registry.add_to_registry(name="get_named_beta_schedule")
 def get_named_beta_schedule(schedule_name, num_diffusion_timesteps):
     """
     Get a pre-defined beta schedule for the given name.
@@ -61,7 +63,7 @@ def betas_for_alpha_bar(num_diffusion_timesteps, alpha_bar, max_beta=0.999):
         betas.append(min(1 - alpha_bar(t2) / alpha_bar(t1), max_beta))
     return np.array(betas)
 
-
+@diffusion_models_registry.add_to_registry(name="ModelMeanType")
 class ModelMeanType(enum.Enum):
     """
     Which type of output the model predicts.
@@ -71,7 +73,7 @@ class ModelMeanType(enum.Enum):
     START_X = enum.auto()  # the model predicts x_0
     EPSILON = enum.auto()  # the model predicts epsilon
 
-
+@diffusion_models_registry.add_to_registry(name="ModelVarType")
 class ModelVarType(enum.Enum):
     """
     What is used as the model's output variance.
@@ -85,7 +87,7 @@ class ModelVarType(enum.Enum):
     FIXED_LARGE = enum.auto()
     LEARNED_RANGE = enum.auto()
 
-
+@diffusion_models_registry.add_to_registry(name="LossType")
 class LossType(enum.Enum):
     MSE = enum.auto()  # use raw MSE loss (and KL when learning variances)
     RESCALED_MSE = (

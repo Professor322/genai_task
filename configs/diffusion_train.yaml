@@ -13,9 +13,11 @@ data:
     workers: 8
 
 train:
-    trainer: base_diffusion_trainer
-    model: base_diffusion
+    trainer: improved_diffusion_trainer
+    model: improved_diffusion
+    diffusion: spaced_diffusion
     optimizer: adam
+    noise_sampler: uniform_sampler
     checkpoint_path: null
     val_metrics: ["fid"]
     start_step: 0
@@ -26,7 +28,29 @@ train:
 
 
 model_args:
-    hidden_dim: 512
+    # loss is embedded into forward diffusion process
+    forward_process_args:
+        sigma_small: False
+        steps: 1000
+        noise_schedule: cosine
+        timestep_respacing: ""
+        use_kl: False
+        predict_xstart: False
+        rescale_timesteps: True
+        rescale_learned_sigmas: True
+    reverse_process_args:
+        image_size: 64
+        num_channels: 128
+        num_res_blocks: 2
+        num_heads: 4
+        num_heads_upsample: -1
+        attention_resolutions: 16,8
+        dropout: 0.0
+        learn_sigma: False
+        class_cond: True
+        use_checkpoint: False
+        use_scale_shift_norm: True
+        num_classes :  101
 
 optimizer_args:
     lr: 0.0001

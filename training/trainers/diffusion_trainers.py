@@ -69,3 +69,104 @@ class BaseDiffusionTrainer(BaseTrainer):
         # synthesized additional batch of images to log
         # return batch_of_images, path_to_saved_pics, 
         raise NotImplementedError()
+
+@diffusion_trainers_registry.add_to_registry(name="improved_diffusion_trainer")
+class ImprovedDiffusionTrainer(BaseTrainer):
+    def __init__(self, config):
+        print(config)
+        super().__init__(config)
+    
+    def __create_model(self,
+                        image_size,
+                        num_channels,
+                        num_res_blocks,
+                        learn_sigma,
+                        class_cond,
+                        use_checkpoint,
+                        attention_resolutions,
+                        num_heads,
+                        num_heads_upsample,
+                        use_scale_shift_norm,
+                        dropout,
+                        num_classes):
+        if image_size == 256:
+            channel_mult = (1, 1, 2, 2, 4, 4)
+        elif image_size == 64:
+            channel_mult = (1, 2, 3, 4)
+        elif image_size == 32:
+            channel_mult = (1, 2, 2, 2)
+        else:
+            raise ValueError(f"unsupported image size: {image_size}")
+
+        attention_ds = []
+        for res in attention_resolutions.split(","):
+            attention_ds.append(image_size // int(res))
+
+        return diffusion_models_registry[self.config['train']['model']](
+            in_channels=3,
+            model_channels=num_channels,
+            out_channels=(3 if not learn_sigma else 6),
+            num_res_blocks=num_res_blocks,
+            attention_resolutions=tuple(attention_ds),
+            dropout=dropout,
+            channel_mult=channel_mult,
+            num_classes=(num_classes if class_cond else None),
+            use_checkpoint=use_checkpoint,
+            num_heads=num_heads,
+            num_heads_upsample=num_heads_upsample,
+            use_scale_shift_norm=use_scale_shift_norm,
+        )
+
+    def __create_gaussian_diffusion(
+        self,
+        steps=1000,
+        learn_sigma=False,
+        noise_schedule="linear",
+        use_kl=False,
+        predict_xstart=False,
+        rescale_timesteps=False,
+        rescale_learned_sigmas=False,
+        timestep_respacing="",
+        sigma_small=False
+    ):
+        betas = diffusion_models_registry["get_named_beta_schedule"](noise_schedule, steps)
+        LossType = diffusion_models_registry["LossType"]
+        ModelMeanType = diffusion_models_registry["ModelMeanType"]
+        ModelVarType = diffusion_models_registry["ModelVarType"]
+        if use_kl:
+            loss_type = LossType.RESCALED_KL
+        elif rescale_learned_sigmas:
+            loss_type = LossType.RESCALED_MSE
+        else:
+            loss_type = LossType.MSE
+        if not timestep_respacing:
+            timestep_respacing = [steps]
+        return diffusion_models_registry[self.config['train']['diffusion']](
+            use_timesteps=diffusion_models_registry["space_timesteps"](steps, timestep_respacing),
+            betas=betas,
+            model_mean_type=(
+                ModelMeanType.EPSILON if not predict_xstart else ModelMeanType.START_X
+            ),
+            model_var_type=(
+                (
+                    ModelVarType.FIXED_LARGE
+                    if not sigma_small
+                    else ModelVarType.FIXED_SMALL
+                )
+                if not learn_sigma
+                else ModelVarType.LEARNED_RANGE
+            ),
+            loss_type=loss_type,
+            rescale_timesteps=rescale_timesteps,
+        )
+
+    def setup_models(self):
+        # create model for reconstruction
+        self.model = self.__create_model(**self.config['model_args']['reverse_process_args'])
+        # create diffusion process
+        diffusion = self.__create_gaussian_diffusion(**self.config['model_args']['forward_process_args']) 
+        # create noise sampler
+        self.noise_sampler = diffusion_models_registry[self.config['train']['noise_sampler']](diffusion)
+
+    def setup_experiment_dir(self):
+        pass

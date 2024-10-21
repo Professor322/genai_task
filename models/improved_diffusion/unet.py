@@ -7,6 +7,7 @@ import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ..diffusion_models import diffusion_models_registry
 from .fp16_util import convert_module_to_f16, convert_module_to_f32
 from .nn import (
     SiLU,
@@ -275,6 +276,7 @@ class QKVAttention(nn.Module):
         model.total_ops += th.DoubleTensor([matmul_ops])
 
 
+@diffusion_models_registry.add_to_registry(name="improved_diffusion")
 class UNetModel(nn.Module):
     """
     The full UNet model with attention and timestep embedding.
