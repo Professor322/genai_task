@@ -242,14 +242,13 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         return {"train_loss": loss.item()}
     
     def save_checkpoint(self):
-        save_checkpoint_path = self.config['train']['checkpoint_path']
+        save_checkpoint_path = f"checkpoint_{self.config['train']['model']}_step_{self.global_step}"
         print(f"Saving checkpoint at: {save_checkpoint_path}")
         torch.save({
             "model_state_dict": self.model.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
             "diffusion": self.diffusion,
-            "train_losses": self.train_losses,
-            "scheduler": self.sampler,
+            "noise_sampler": self.noise_sampler,
             "global_step": self.global_step
         }, save_checkpoint_path)
 
@@ -263,5 +262,5 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         self.model.load_state_dict(dict["model_state_dict"])
         self.optimizer.load_state_dict(dict["optimizer_state_dict"])
         self.diffusion = dict["diffusion"]
-        self.scheduler = dict["scheduler"]
+        self.noise_sampler = dict["noise_sampler"]
         self.global_step = dict['global_step']
