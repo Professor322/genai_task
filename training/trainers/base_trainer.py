@@ -5,6 +5,7 @@ from datasets.dataloaders import InfiniteLoader
 from training.loggers import TrainingLogger
 from datasets.datasets import datasets_registry
 from metrics.metrics import metrics_registry
+from tqdm import tqdm
 
 
 class BaseTrainer:
@@ -14,6 +15,7 @@ class BaseTrainer:
         self.device = config.exp.device
         self.start_step = config.train.start_step
         self.step = 0
+        self.global_step = 0
     
 
     def setup(self):
@@ -28,6 +30,7 @@ class BaseTrainer:
 
         self.setup_datasets()
         self.setup_dataloaders()
+        self.load_checkpoint()
 
 
     def setup_inference(self):
@@ -40,6 +43,7 @@ class BaseTrainer:
 
         self.setup_datasets()
         self.setup_dataloaders()
+        self.load_checkpoint()
 
 
     @abstractmethod
@@ -93,7 +97,7 @@ class BaseTrainer:
     def training_loop(self):
         self.to_train()
 
-        for self.step in range(self.start_step, self.config.train.steps + 1):
+        for self.step in tqdm(range(self.start_step, self.config.train.steps + 1)):
             losses_dict = self.train_step()
             self.logger.update_losses(losses_dict)
 
@@ -116,6 +120,10 @@ class BaseTrainer:
 
     @abstractmethod
     def save_checkpoint(self):
+        pass
+    
+    @abstractmethod
+    def load_checkpoint(self):
         pass
 
 

@@ -2,24 +2,17 @@ import wandb
 import torch
 from PIL import Image
 from collections import defaultdict
+import os
 
 class WandbLogger:
     def __init__(self, config):
         wandb.login(key=os.environ['WANDB_KEY'].strip())
-        if config.train.checkpoint_path != "":
-            # TO DO
-            # resume training run from checkpoint
-            raise NotImplementedError()
-        else:
-            # TO DO
-            # create new wandb run and save args, config and etc.
-            # self.wandb_args = {
-            #     "id": wandb.util.generate_id(),
-            #     "project": ...,
-            #     "name": ...,
-            #     "config": ...,
-            # }
-            raise NotImplementedError()
+        self.wandb_args = {
+                "id": wandb.util.generate_id(),
+                "project": "genai_task",
+                "name": config['train']['model'],
+                "config": config,
+        }
 
         wandb.init(**self.wandb_args, resume="allow")
 
@@ -28,7 +21,7 @@ class WandbLogger:
     def log_values(values_dict: dict, step: int):
         # TO DO 
         # log values to wandb
-        raise NotImplementedError()
+        wandb.log(values_dict, step=step)
 
     @staticmethod
     def log_images(images: dict, step: int):
@@ -46,17 +39,19 @@ class TrainingLogger:
     def log_train_losses(self, step: int):
         # avarage losses in losses_memory
         # log them and clear losses_memory
-        raise NotImplementedError()
-
+        losses_avg = defaultdict(list)
+        for loss_name, loss_val in self.losses_memory.items():
+            losses_avg[loss_name] = sum(loss_val) / len(loss_val)
+        self.logger.log_values(losses_avg, step)
+        self.losses_memory = defaultdict(list)
 
     def log_val_metrics(self, val_metrics: dict, step: int):
         # TO DO
-        raise NotImplementedError()
-
+        pass
 
     def log_batch_of_images(self, batch: torch.Tensor, step: int, images_type: str = ""):
         # TO DO
-        raise NotImplementedError()
+        pass
 
 
     def update_losses(self, losses_dict):

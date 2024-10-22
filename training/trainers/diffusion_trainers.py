@@ -3,8 +3,13 @@ from training.trainers.base_trainer import BaseTrainer
 
 from models.diffusion_models import diffusion_models_registry
 from training.optimizers import optimizers_registry
-from training.losses.diffusion_losses import DiffusionLossBuilder
+from datasets.datasets import datasets_registry
+from datasets.dataloaders import InfiniteLoader
+from torch.utils.data import DataLoader
+from ..loggers import TrainingLogger
 
+import torch
+import os
 
 
 diffusion_trainers_registry = ClassRegistry()
@@ -73,7 +78,6 @@ class BaseDiffusionTrainer(BaseTrainer):
 @diffusion_trainers_registry.add_to_registry(name="improved_diffusion_trainer")
 class ImprovedDiffusionTrainer(BaseTrainer):
     def __init__(self, config):
-        print(config)
         super().__init__(config)
     
     def __create_model(self,
@@ -162,11 +166,102 @@ class ImprovedDiffusionTrainer(BaseTrainer):
 
     def setup_models(self):
         # create model for reconstruction
-        self.model = self.__create_model(**self.config['model_args']['reverse_process_args'])
+        self.model = self.__create_model(**self.config['model_args']['reverse_process_args']).to(self.device)
         # create diffusion process
-        diffusion = self.__create_gaussian_diffusion(**self.config['model_args']['forward_process_args']) 
+        self.diffusion = self.__create_gaussian_diffusion(**self.config['model_args']['forward_process_args']) 
         # create noise sampler
-        self.noise_sampler = diffusion_models_registry[self.config['train']['noise_sampler']](diffusion)
+        self.noise_sampler = diffusion_models_registry[self.config['train']['noise_sampler']](self.diffusion)
+        print("Model setup!")
 
     def setup_experiment_dir(self):
         pass
+
+    def to_train(self):
+        self.model.train()
+
+    def to_eval(self):
+        self.model.eval()
+    
+    def setup_metrics(self):
+        pass
+
+    def setup_logger(self):
+        self.logger = TrainingLogger(self.config)
+
+    def setup_losses(self):
+        # loss is embedded into forward diffusion process
+        pass
+
+    def setup_optimizers(self):
+        self.optimizer =\
+            optimizers_registry[self.config['train']['optimizer']](self.model.parameters(),
+                                                                  **self.config['optimizer_args'])
+    def setup_datasets(self):
+        dataset_type = self.config['data']['dataset']
+        self.train_dataset = datasets_registry[dataset_type](self.config['data']['input_train_dir'], train=True)
+        self.test_dataset = datasets_registry[dataset_type](self.config['data']['input_val_dir'], train=False)
+    
+    def setup_dataloaders(self):
+        train_batch_size = self.config['data']['train_batch_size']
+        num_workers = self.config['data']['workers']
+        self.train_dataloader = InfiniteLoader(self.train_dataset,
+                                               batch_size=train_batch_size,
+                                               shuffle=True,
+                                               num_workers=num_workers)
+        test_batch_size = self.config['data']['val_batch_size']
+        self.test_dataloader = DataLoader(self.test_dataset,
+                                        batch_size=test_batch_size,
+                                        shuffle=False,
+                                        num_workers=num_workers)
+        self.train_dataloader_iter = iter(self.train_dataloader)
+    
+    def train_step(self):
+        self.optimizer.zero_grad()
+        images, labels = next(self.train_dataloader_iter)
+        images = images.to(self.device)
+        labels['y'] = labels['y'].to(self.device)
+        # sample timesteps for the batch
+        # returns timesteps per each sample in the batch and weights for each timestamp
+        # in case of uniform scheduler, weights for each timestamp is equal to 1
+        t, _ = self.noise_sampler.sample(images.shape[0], self.device)
+
+        # internally this function:
+        # > generates random noise to apply to the image
+        # > does forward diffusion process
+        # > gets the output from the model
+        # > calculates loss
+        losses = self.diffusion.training_losses(model=self.model, x_start=images, t=t, model_kwargs=labels)
+
+        # loss: could be KL or MSE, or rescaled ones. Default rescaled MSE
+        loss = losses["loss"].mean()
+        loss.backward()
+        # TODO add annealing
+        self.optimizer.step()
+        self.global_step += 1
+        self.step += 1
+        return {"train_loss": loss.item()}
+    
+    def save_checkpoint(self):
+        save_checkpoint_path = self.config['train']['checkpoint_path']
+        print(f"Saving checkpoint at: {save_checkpoint_path}")
+        torch.save({
+            "model_state_dict": self.model.state_dict(),
+            "optimizer_state_dict": self.optimizer.state_dict(),
+            "diffusion": self.diffusion,
+            "train_losses": self.train_losses,
+            "scheduler": self.sampler,
+            "global_step": self.global_step
+        }, save_checkpoint_path)
+
+    def load_checkpoint(self):
+        load_checkpoint_path = self.config['train']['checkpoint_path']
+        print(f"Loading checkpoint: {load_checkpoint_path}")
+        if not os.path.isfile(load_checkpoint_path):
+            print("Err: no such file, not loading")
+            return
+        dict = torch.load(load_checkpoint_path)
+        self.model.load_state_dict(dict["model_state_dict"])
+        self.optimizer.load_state_dict(dict["optimizer_state_dict"])
+        self.diffusion = dict["diffusion"]
+        self.scheduler = dict["scheduler"]
+        self.global_step = dict['global_step']

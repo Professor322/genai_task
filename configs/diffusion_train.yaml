@@ -6,8 +6,9 @@ exp:
     model_type: diffusion
 
 data:
-    input_train_dir: path/to/train/dir
-    input_val_dir: path/to/validation/dir
+    dataset: food101_dataset
+    input_train_dir: /home/kolek/Edu/thesis/data/train
+    input_val_dir: /home/kolek/Edu/thesis/data/test
     train_batch_size: 8
     val_batch_size: 8
     workers: 8
@@ -18,11 +19,11 @@ train:
     diffusion: spaced_diffusion
     optimizer: adam
     noise_sampler: uniform_sampler
-    checkpoint_path: null
+    checkpoint_path: diffusion_rescaled_mse_cosine.pkl
     val_metrics: ["fid"]
     start_step: 0
     steps: 300000
-    log_step: 500
+    log_step: 10
     checkpoint_step: 15000
     val_step: 15000
 
@@ -54,8 +55,5 @@ model_args:
 
 optimizer_args:
     lr: 0.0001
-
-losses_coef:
-    mse: 1.0
 
 

@@ -2,6 +2,10 @@ from PIL import Image
 from torch.utils.data import Dataset
 from utils.data_utils import make_dataset
 from utils.class_registry import ClassRegistry
+import os
+import glob
+import numpy as np
+import torch
 
 
 datasets_registry = ClassRegistry()
@@ -25,3 +29,36 @@ class BaseDataset(Dataset):
     def __len__(self):
         return len(self.paths)
 
+@datasets_registry.add_to_registry(name="food101_dataset")
+class Food101Dataset(Dataset):
+    def __init__(self, directory_path, train=True):
+        # get classes
+        self.dataset_root = directory_path
+        self.train = train
+        class_names = os.listdir(directory_path)
+        class_labels = range(0, len(class_names))
+        # for convenience
+        self.classes_to_num = {class_name:class_label for class_name, class_label in zip(class_names, class_labels)}
+        self.num_to_classes = {class_label:class_name for class_name, class_label in zip(class_names, class_labels)}
+        # get paths to the images
+        self.image_paths = glob.glob(self.dataset_root + "/*/*")
+
+        
+    def __getitem__(self, idx):
+        # load image and convert it to RGB
+        image = Image.open(self.image_paths[idx])
+        image = np.array(image.convert("RGB"))
+        # normalize image to range [-1, 1]
+        image = image.astype(np.float32) / 127.5 - 1
+        # then convert to torch tensor
+        image = torch.tensor(image, dtype=torch.float32)
+                
+        # deduct class label from path
+        image_class = self.image_paths[idx].split("/")[-2]
+
+        # to comply with improved diffusion unet channels should be
+        # at first dimension and labels should be returned as a dict
+        return image.permute([2, 0, 1]), {"y": self.classes_to_num[image_class]}
+
+    def __len__(self):
+        return len(self.image_paths)
