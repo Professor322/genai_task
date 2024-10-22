@@ -174,7 +174,12 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         print("Model setup!")
 
     def setup_experiment_dir(self):
-        pass
+        experiments_dir = self.config['exp']['exp_dir']
+        if not os.path.isdir(experiments_dir):
+            print(f"Creating dir for experiments: {experiments_dir}")
+            os.mkdir(experiments_dir)
+        else:
+            print(f"Using existing {experiments_dir}")
 
     def to_train(self):
         self.model.train()
@@ -242,7 +247,9 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         return {"train_loss": loss.item()}
     
     def save_checkpoint(self):
-        save_checkpoint_path = f"checkpoint_{self.config['train']['model']}_step_{self.global_step}"
+        experiments_dir = self.config['exp']['exp_dir']
+        model_name = self.config['train']['model']
+        save_checkpoint_path = f"{experiments_dir}/checkpoint_{model_name}_step_{self.global_step}"
         print(f"Saving checkpoint at: {save_checkpoint_path}")
         torch.save({
             "model_state_dict": self.model.state_dict(),
