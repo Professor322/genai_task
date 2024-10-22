@@ -18,9 +18,11 @@ if __name__ == "__main__":
 
     if config.exp.model_type == "gan":
         from training.trainers.gan_trainers import gan_trainers_registry
+
         trainer = gan_trainers_registry[config.train.trainer](config)
     elif config.exp.model_type == "diffusion":
         from training.trainers.diffusion_trainers import diffusion_trainers_registry
+
         trainer = diffusion_trainers_registry[config.train.trainer](config)
     else:
         raise ValueError(f"Unknown model type {config.exp.model_type}")

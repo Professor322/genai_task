@@ -16,7 +16,6 @@ class BaseTrainer:
         self.start_step = config.train.start_step
         self.step = 0
         self.global_step = 0
-    
 
     def setup(self):
         self.setup_experiment_dir()
@@ -32,7 +31,6 @@ class BaseTrainer:
         self.setup_dataloaders()
         self.load_checkpoint()
 
-
     def setup_inference(self):
         self.setup_experiment_dir()
 
@@ -44,7 +42,6 @@ class BaseTrainer:
         self.setup_datasets()
         self.setup_dataloaders()
         self.load_checkpoint()
-
 
     @abstractmethod
     def setup_models(self):
@@ -93,7 +90,6 @@ class BaseTrainer:
         # self.train_dataloader = ...
         raise NotImplementedError()
 
-
     def training_loop(self):
         self.to_train()
 
@@ -113,7 +109,6 @@ class BaseTrainer:
             if self.global_step % self.config.train.checkpoint_step == 0:
                 self.save_checkpoint()
 
-
     @abstractmethod
     def train_step(self):
         pass
@@ -121,11 +116,10 @@ class BaseTrainer:
     @abstractmethod
     def save_checkpoint(self):
         pass
-    
+
     @abstractmethod
     def load_checkpoint(self):
         pass
-
 
     @torch.no_grad()
     def validate(self):
@@ -135,16 +129,13 @@ class BaseTrainer:
         metrics_dict = {}
         for metric in self.metrics:
             metrics_dict[metric.get_name()] = metric(
-                orig_path=self.config.data.input_val_dir, 
-                synt_path=images_pth
+                orig_path=self.config.data.input_val_dir, synt_path=images_pth
             )
         return metrics_dict, images_sample
-
 
     @abstractmethod
     def synthesize_images(self):
         pass
-
 
     @torch.no_grad()
     def inference(self):
@@ -153,6 +144,3 @@ class BaseTrainer:
         # Calculate metrics
         # Log if needed
         raise NotImplementedError()
-
-
-

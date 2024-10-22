@@ -60,6 +60,5 @@ class SoftPlusGenLoss(nn.Module):
         # calculate softplus loss for discriminator
         raise NotImplementedError()
 
+
 # Add the other losses you need
-
-

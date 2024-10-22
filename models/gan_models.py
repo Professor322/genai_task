@@ -49,7 +49,9 @@ class VerySimpleDiscriminator(nn.Module):
         for i in range(self.blocks_num):
             self.blocks.append(VerySimpleBlock(self.hidden_dim, self.hidden_dim))
 
-        self.to_label = nn.Conv2d(self.hidden_dim, 1, kernel_size=4, stride=1, padding=0)
+        self.to_label = nn.Conv2d(
+            self.hidden_dim, 1, kernel_size=4, stride=1, padding=0
+        )
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -66,9 +68,13 @@ class VerySimpleDiscriminator(nn.Module):
 class VerySimpleBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1)
-        self.activation = nn.LeakyReLU(-0.2) 
+        self.conv1 = nn.Conv2d(
+            in_channels, out_channels, kernel_size=3, stride=1, padding=1
+        )
+        self.conv2 = nn.Conv2d(
+            out_channels, out_channels, kernel_size=3, stride=1, padding=1
+        )
+        self.activation = nn.LeakyReLU(-0.2)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -76,5 +82,3 @@ class VerySimpleBlock(nn.Module):
         x = self.conv2(x)
         x = self.activation(x)
         return x
-
-

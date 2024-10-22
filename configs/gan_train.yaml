@@ -47,5 +47,3 @@ gen_losses:
 
 disc_losses:
     softplus_disc: 1.0
-
-

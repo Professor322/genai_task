@@ -272,7 +272,7 @@ class QKVAttention(nn.Module):
         # We perform two matmuls with the same number of ops.
         # The first computes the weight matrix, the second computes
         # the combination of the value vectors.
-        matmul_ops = 2 * b * (num_spatial ** 2) * c
+        matmul_ops = 2 * b * (num_spatial**2) * c
         model.total_ops += th.DoubleTensor([matmul_ops])
 
 
@@ -318,7 +318,7 @@ class UNetModel(nn.Module):
         use_scale_shift_norm=False,
     ):
         super().__init__()
-        
+
         if num_heads_upsample == -1:
             num_heads_upsample = num_heads
 
@@ -523,4 +523,3 @@ class UNetModel(nn.Module):
             h = module(cat_in, emb)
             result["up"].append(h.type(x.dtype))
         return result
-

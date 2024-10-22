@@ -5,6 +5,7 @@ import torch as th
 
 from ..diffusion_models import diffusion_models_registry
 
+
 class ScheduleSampler(ABC):
     """
     A distribution over timesteps in the diffusion process, intended to reduce
@@ -41,6 +42,7 @@ class ScheduleSampler(ABC):
         weights_np = 1 / (len(p) * p[indices_np])
         weights = th.from_numpy(weights_np).float().to(device)
         return indices, weights
+
 
 @diffusion_models_registry.add_to_registry(name="uniform_sampler")
 class UniformSampler(ScheduleSampler):

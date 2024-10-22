@@ -63,6 +63,7 @@ def betas_for_alpha_bar(num_diffusion_timesteps, alpha_bar, max_beta=0.999):
         betas.append(min(1 - alpha_bar(t2) / alpha_bar(t1), max_beta))
     return np.array(betas)
 
+
 @diffusion_models_registry.add_to_registry(name="ModelMeanType")
 class ModelMeanType(enum.Enum):
     """
@@ -72,6 +73,7 @@ class ModelMeanType(enum.Enum):
     PREVIOUS_X = enum.auto()  # the model predicts x_{t-1}
     START_X = enum.auto()  # the model predicts x_0
     EPSILON = enum.auto()  # the model predicts epsilon
+
 
 @diffusion_models_registry.add_to_registry(name="ModelVarType")
 class ModelVarType(enum.Enum):
@@ -86,6 +88,7 @@ class ModelVarType(enum.Enum):
     FIXED_SMALL = enum.auto()
     FIXED_LARGE = enum.auto()
     LEARNED_RANGE = enum.auto()
+
 
 @diffusion_models_registry.add_to_registry(name="LossType")
 class LossType(enum.Enum):
@@ -515,7 +518,7 @@ class GaussianDiffusion:
         noise = th.randn_like(x)
         mean_pred = (
             out["pred_xstart"] * th.sqrt(alpha_bar_prev)
-            + th.sqrt(1 - alpha_bar_prev - sigma ** 2) * eps
+            + th.sqrt(1 - alpha_bar_prev - sigma**2) * eps
         )
         nonzero_mask = (
             (t != 0).float().view(-1, *([1] * (len(x.shape) - 1)))

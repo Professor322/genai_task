@@ -19,14 +19,12 @@ class BaseGANTrainer(BaseTrainer):
         # do not forget to load state from checkpoints if provided
         raise NotImplementedError()
 
-
     def setup_optimizers(self):
         # TO DO
         # self.generator_optimizer = ...
         # self.dicriminator_optimizer = ...
         # do not forget to load state from checkpoints if provided
         raise NotImplementedError()
-
 
     def setup_losses(self):
         # TO DO
@@ -38,12 +36,10 @@ class BaseGANTrainer(BaseTrainer):
         # all trainable modules to .train()
         raise NotImplementedError()
 
-
     def to_eval(self):
         # TO DO
         # all trainable modules to .eval()
         raise NotImplementedError()
-
 
     def train_step(self):
         # TO DO
@@ -54,16 +50,14 @@ class BaseGANTrainer(BaseTrainer):
         # return dict of losses to log
         raise NotImplementedError()
 
-
     def save_checkpoint(self):
         # TO DO
         # save all necessary parts of your pipeline
         raise NotImplementedError()
 
-
     def synthesize_images(self):
         # TO DO
         # synthesize images and save to self.experiment_dir/images
         # synthesized additional batch of images to log
-        # return batch_of_images,path_to_saved_pics, 
+        # return batch_of_images,path_to_saved_pics,
         raise NotImplementedError()

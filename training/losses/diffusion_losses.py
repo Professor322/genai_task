@@ -17,7 +17,6 @@ class DiffusionLossBuilder:
                 loss_args = config.losses_args
             self.losses[loss_name] = losses_registry[loss_name](**loss_args)
 
-
     def calculate_loss(batch_data):
         loss_dict = {}
         total_loss = 0.0
@@ -41,5 +40,3 @@ class MSELoss(nn.Module):
 
 
 # Add the other losses you need
-
-

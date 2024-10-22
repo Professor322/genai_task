@@ -1,5 +1,5 @@
 exp:
-    exp_dir: /content/drive/MyDrive/experiments
+    exp_dir: experiments
     device: cuda
     seed: 777
     use_wandb: True
@@ -7,9 +7,9 @@ exp:
 
 data:
     dataset: food101_dataset
-    input_train_dir: /content/train
-    input_val_dir: /content/test
-    train_batch_size: 64
+    input_train_dir: /home/kolek/Edu/thesis/data/train
+    input_val_dir: /home/kolek/Edu/thesis/data/test
+    train_batch_size: 8
     val_batch_size: 8
     workers: 8
 

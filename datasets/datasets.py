@@ -29,6 +29,7 @@ class BaseDataset(Dataset):
     def __len__(self):
         return len(self.paths)
 
+
 @datasets_registry.add_to_registry(name="food101_dataset")
 class Food101Dataset(Dataset):
     def __init__(self, directory_path, train=True):
@@ -38,13 +39,18 @@ class Food101Dataset(Dataset):
         class_names = os.listdir(directory_path)
         class_labels = range(0, len(class_names))
         # for convenience
-        self.classes_to_num = {class_name:class_label for class_name, class_label in zip(class_names, class_labels)}
-        self.num_to_classes = {class_label:class_name for class_name, class_label in zip(class_names, class_labels)}
+        self.classes_to_num = {
+            class_name: class_label
+            for class_name, class_label in zip(class_names, class_labels)
+        }
+        self.num_to_classes = {
+            class_label: class_name
+            for class_name, class_label in zip(class_names, class_labels)
+        }
         # get paths to the images
         self.image_paths = glob.glob(self.dataset_root + "/*/*")
         print(f"Dataset got: {self.__len__()} images")
 
-        
     def __getitem__(self, idx):
         # load image and convert it to RGB
         image = Image.open(self.image_paths[idx])
@@ -53,7 +59,7 @@ class Food101Dataset(Dataset):
         image = image.astype(np.float32) / 127.5 - 1
         # then convert to torch tensor
         image = torch.tensor(image, dtype=torch.float32)
-                
+
         # deduct class label from path
         image_class = self.image_paths[idx].split("/")[-2]
 

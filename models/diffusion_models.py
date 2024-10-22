@@ -15,19 +15,21 @@ from .improved_diffusion.gaussian_diffusion import (
     ModelVarType,
     LossType,
 )
-from .improved_diffusion.respace import (
-    SpacedDiffusion,
-    space_timesteps
-)
+from .improved_diffusion.respace import SpacedDiffusion, space_timesteps
 
 from .improved_diffusion.scheduler import UniformSampler
+
 
 class VerySimpleUnetBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1)
-        self.activation = nn.LeakyReLU(-0.2) 
+        self.conv1 = nn.Conv2d(
+            in_channels, out_channels, kernel_size=3, stride=1, padding=1
+        )
+        self.conv2 = nn.Conv2d(
+            out_channels, out_channels, kernel_size=3, stride=1, padding=1
+        )
+        self.activation = nn.LeakyReLU(-0.2)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -45,7 +47,9 @@ class VerySimpleUnet(nn.Module):
         self.base_hidden_dim = model_config["base_hidden_dim"]
         self.blocks_num = model_config["blocks_num"]
 
-        self.input_conv = nn.Conv2d(3, self.base_hidden_dim, kernel_size=3, stride=1, padding=1)
+        self.input_conv = nn.Conv2d(
+            3, self.base_hidden_dim, kernel_size=3, stride=1, padding=1
+        )
         self.time_embed = nn.Embedding(self.num_steps, self.base_hidden_dim)
         self.down_blocks = nn.ModuleList([])
         self.up_blocks = nn.ModuleList([])
@@ -56,7 +60,6 @@ class VerySimpleUnet(nn.Module):
 
             self.down_blocks.append(VerySimpleUnetBlock(lower_dim, higher_dim))
             self.up_blocks.append(VerySimpleUnetBlock(higher_dim, lower_dim))
-
 
     def forward(self, x, t):
         t = self.time_embed(t)
@@ -72,5 +75,5 @@ class VerySimpleUnet(nn.Module):
         for block in reversed(self.up_blocks):
             x = block(x)
             x = F.interpolate(x, x.size(-1) * 2)
-            
+
         return x
