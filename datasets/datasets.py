@@ -42,6 +42,7 @@ class Food101Dataset(Dataset):
         self.num_to_classes = {class_label:class_name for class_name, class_label in zip(class_names, class_labels)}
         # get paths to the images
         self.image_paths = glob.glob(self.dataset_root + "/*/*")
+        print(f"Dataset got: {self.__len__()} images")
 
         
     def __getitem__(self, idx):
