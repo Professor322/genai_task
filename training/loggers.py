@@ -3,16 +3,20 @@ import torch
 from PIL import Image
 from collections import defaultdict
 import os
+from utils.class_registry import ClassRegistry
+
+loggers_registry = ClassRegistry()
 
 
 class WandbLogger:
-    def __init__(self, config):
+    def __init__(self, config, run_id=None):
         wandb.login(key=os.environ["WANDB_KEY"].strip())
+        self.run_id = run_id if run_id is not None else wandb.util.generate_id()
         self.wandb_args = {
-            "id": wandb.util.generate_id(),
+            "id": self.run_id,
             "project": "genai_task",
-            "name": config["train"]["model"],
-            "config": {"test": "test"},
+            "name": f"{config['train']['model']}_{self.run_id}",
+            "config": config,
         }
 
         wandb.init(**self.wandb_args, resume="allow")
@@ -30,9 +34,10 @@ class WandbLogger:
         raise NotImplementedError()
 
 
+@loggers_registry.add_to_registry(name="training_logger")
 class TrainingLogger:
-    def __init__(self, config):
-        self.logger = WandbLogger(config)
+    def __init__(self, config, run_id=None):
+        self.logger = WandbLogger(config, run_id=run_id)
         self.losses_memory = defaultdict(list)
 
     def log_train_losses(self, step: int):
@@ -45,8 +50,7 @@ class TrainingLogger:
         self.losses_memory = defaultdict(list)
 
     def log_val_metrics(self, val_metrics: dict, step: int):
-        # TO DO
-        pass
+        return self.logger.log_values(val_metrics, step)
 
     def log_batch_of_images(
         self, batch: torch.Tensor, step: int, images_type: str = ""

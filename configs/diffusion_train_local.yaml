@@ -19,13 +19,13 @@ train:
     diffusion: spaced_diffusion
     optimizer: adam
     noise_sampler: uniform_sampler
-    checkpoint_path: diffusion_rescaled_mse_cosine.pkl
+    checkpoint_path: experiments/checkpoint_improved_diffusion_step_2.pkl
     val_metrics: ["fid"]
     start_step: 0
     steps: 300000
     log_step: 500
-    checkpoint_step: 15000
-    val_step: 15000
+    checkpoint_step: 2
+    val_step: 2
 
 
 model_args:

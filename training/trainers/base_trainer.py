@@ -25,11 +25,13 @@ class BaseTrainer:
         self.setup_losses()
 
         self.setup_metrics()
+        # checkpoint might have info about run id
+        # that is needed to continue training
+        self.load_checkpoint()
         self.setup_logger()
 
         self.setup_datasets()
         self.setup_dataloaders()
-        self.load_checkpoint()
 
     def setup_inference(self):
         self.setup_experiment_dir()
@@ -37,11 +39,13 @@ class BaseTrainer:
         self.setup_models()
 
         self.setup_metrics()
+        # checkpoint might have info about run id
+        # that is needed to continue training
+        self.load_checkpoint()
         self.setup_logger()
 
         self.setup_datasets()
         self.setup_dataloaders()
-        self.load_checkpoint()
 
     @abstractmethod
     def setup_models(self):

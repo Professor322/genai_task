@@ -6,7 +6,7 @@ from training.optimizers import optimizers_registry
 from datasets.datasets import datasets_registry
 from datasets.dataloaders import InfiniteLoader
 from torch.utils.data import DataLoader
-from ..loggers import TrainingLogger
+from training.loggers import loggers_registry
 
 import torch
 import os
@@ -73,6 +73,7 @@ class BaseDiffusionTrainer(BaseTrainer):
 class ImprovedDiffusionTrainer(BaseTrainer):
     def __init__(self, config):
         super().__init__(config)
+        self.run_id = None
 
     def __create_model(
         self,
@@ -197,7 +198,7 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         pass
 
     def setup_logger(self):
-        self.logger = TrainingLogger(self.config)
+        self.logger = loggers_registry["training_logger"](self.config, self.run_id)
 
     def setup_losses(self):
         # loss is embedded into forward diffusion process
@@ -267,7 +268,7 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         experiments_dir = self.config["exp"]["exp_dir"]
         model_name = self.config["train"]["model"]
         save_checkpoint_path = (
-            f"{experiments_dir}/checkpoint_{model_name}_step_{self.global_step}"
+            f"{experiments_dir}/checkpoint_{model_name}_step_{self.global_step}.pkl"
         )
         print(f"Saving checkpoint at: {save_checkpoint_path}")
         torch.save(
@@ -277,6 +278,7 @@ class ImprovedDiffusionTrainer(BaseTrainer):
                 "diffusion": self.diffusion,
                 "noise_sampler": self.noise_sampler,
                 "global_step": self.global_step,
+                "run_id": self.logger.logger.run_id,
             },
             save_checkpoint_path,
         )
@@ -293,3 +295,4 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         self.diffusion = dict["diffusion"]
         self.noise_sampler = dict["noise_sampler"]
         self.global_step = dict["global_step"]
+        self.run_id = dict["run_id"]
