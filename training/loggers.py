@@ -11,7 +11,7 @@ class WandbLogger:
                 "id": wandb.util.generate_id(),
                 "project": "genai_task",
                 "name": config['train']['model'],
-                "config": config['model_args']
+                "config": "test"
         }
 
         wandb.init(**self.wandb_args, resume="allow")
