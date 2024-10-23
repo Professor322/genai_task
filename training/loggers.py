@@ -16,7 +16,7 @@ class WandbLogger:
             "id": self.run_id,
             "project": "genai_task",
             "name": f"{config['train']['model']}_{self.run_id}",
-            "config": config,
+            "config": config["exp"],
         }
 
         wandb.init(**self.wandb_args, resume="allow")
