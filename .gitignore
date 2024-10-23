@@ -164,3 +164,4 @@ cython_debug/
 .genai_task
 wandb
 experiments
+metrics/test

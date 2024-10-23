@@ -4,13 +4,15 @@ from training.trainers.base_trainer import BaseTrainer
 from models.diffusion_models import diffusion_models_registry
 from training.optimizers import optimizers_registry
 from datasets.datasets import datasets_registry
-from datasets.dataloaders import InfiniteLoader
-from torch.utils.data import DataLoader
 from training.loggers import loggers_registry
+from metrics.metrics import metrics_registry
+from datasets.dataloaders import InfiniteLoader
+from tqdm import tqdm
 
 import torch
 import os
-
+import shutil
+import cv2
 
 diffusion_trainers_registry = ClassRegistry()
 
@@ -70,10 +72,11 @@ class BaseDiffusionTrainer(BaseTrainer):
 
 
 @diffusion_trainers_registry.add_to_registry(name="improved_diffusion_trainer")
-class ImprovedDiffusionTrainer(BaseTrainer):
+class ImprovedDiffusionTrainer(BaseDiffusionTrainer):
     def __init__(self, config):
         super().__init__(config)
         self.run_id = None
+        self.metrics = {}
 
     def __create_model(
         self,
@@ -195,7 +198,10 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         self.model.eval()
 
     def setup_metrics(self):
-        pass
+        for metric_name in self.config["train"]["val_metrics"]:
+            self.metrics[metric_name] = metrics_registry[metric_name](
+                batch_size=self.config["data"]["val_batch_size"], device=self.device
+            )
 
     def setup_logger(self):
         self.logger = loggers_registry["training_logger"](self.config, self.run_id)
@@ -227,20 +233,14 @@ class ImprovedDiffusionTrainer(BaseTrainer):
             shuffle=True,
             num_workers=num_workers,
         )
-        test_batch_size = self.config["data"]["val_batch_size"]
-        self.test_dataloader = DataLoader(
-            self.test_dataset,
-            batch_size=test_batch_size,
-            shuffle=False,
-            num_workers=num_workers,
-        )
         self.train_dataloader_iter = iter(self.train_dataloader)
 
     def train_step(self):
+        self.model.train()
         self.optimizer.zero_grad()
         images, labels = next(self.train_dataloader_iter)
         images = images.to(self.device)
-        labels["y"] = labels["y"].to(self.device)
+        labels["y"] = labels["y"].to(self.device).type(torch.int64)
         # sample timesteps for the batch
         # returns timesteps per each sample in the batch and weights for each timestamp
         # in case of uniform scheduler, weights for each timestamp is equal to 1
@@ -296,3 +296,58 @@ class ImprovedDiffusionTrainer(BaseTrainer):
         self.noise_sampler = dict["noise_sampler"]
         self.global_step = dict["global_step"]
         self.run_id = dict["run_id"]
+
+    def synthesize_images(self):
+        # this function just going to produce 20 images per class
+        # because that is how many images in test per class
+        # and save those in experiment folder
+        print("Synthesizing images...")
+        experiment_root = self.config["exp"]["exp_dir"]
+        synthetic_images_dir = os.path.join(experiment_root, "synthethic")
+        if os.path.isdir(synthetic_images_dir):
+            shutil.rmtree(synthetic_images_dir)
+        os.mkdir(synthetic_images_dir)
+
+        images_per_class = self.config["train"]["val_images_per_class"]
+        val_sample_images_num = self.config["train"]["val_sample_images"]
+        image_samples = {}
+        for label_name, label_value in tqdm(self.train_dataset.classes_to_num.items()):
+            condition_dict = {
+                "y": torch.tensor(
+                    [label_value] * images_per_class,
+                    dtype=torch.int64,
+                    device=self.device,
+                )
+            }
+            generations = self.inference(
+                batch_size=images_per_class, labels=condition_dict
+            )
+            label_dir = os.path.join(synthetic_images_dir, label_name)
+            os.mkdir(label_dir)
+            for idx, generation in enumerate(generations):
+                cv2.imwrite(
+                    os.path.join(label_dir, f"{idx}.jpg"),
+                    generation,
+                    [cv2.IMWRITE_JPEG_QUALITY, 100],
+                )
+            if len(image_samples) < val_sample_images_num:
+                image_samples[label_name] = generations[0]
+            break
+
+        return image_samples, synthetic_images_dir
+
+    @torch.no_grad()
+    def inference(self, batch_size, labels=None):
+        image_size = self.config["model_args"]["reverse_process_args"]["image_size"]
+        generations = self.diffusion.p_sample_loop(
+            self.model,
+            (batch_size, 3, image_size, image_size),
+            model_kwargs=labels,
+            device=self.device,
+        )
+        # back to [0-255] range RGB images
+        generations = (generations + 1) * 127.5
+        # clamp images to [0-255] and convert to uint8
+        generations = generations.clamp(0, 255).type(torch.uint8)
+        # permute dimensions from [B, 3, H, W] to [B, H, W, 3] and return as numpy
+        return generations.permute([0, 2, 3, 1]).detach().cpu().numpy()

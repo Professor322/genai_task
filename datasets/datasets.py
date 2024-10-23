@@ -69,3 +69,17 @@ class Food101Dataset(Dataset):
 
     def __len__(self):
         return len(self.image_paths)
+
+
+@datasets_registry.add_to_registry(name="fid_dataset")
+class ImageFidDataset(Food101Dataset):
+    def __init__(self, directory_path, train=True):
+        super().__init__(directory_path=directory_path, train=train)
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        image = Image.open(self.image_paths[idx])
+        image = np.array(image.convert("RGB"))
+        return torch.tensor(image, dtype=torch.uint8).permute([2, 0, 1])
