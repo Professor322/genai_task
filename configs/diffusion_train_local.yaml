@@ -20,6 +20,7 @@ train:
     optimizer: adam
     noise_sampler: uniform_sampler
     checkpoint_path: ""
+    checkpoint_save_path: experiments
     val_metrics: ["fid"]
     start_step: 0
     steps: 300000

@@ -265,7 +265,7 @@ class ImprovedDiffusionTrainer(BaseDiffusionTrainer):
         return {"train_loss": loss.item()}
 
     def save_checkpoint(self):
-        experiments_dir = self.config["exp"]["exp_dir"]
+        experiments_dir = self.config["train"]["checkpoint_save_path"]
         model_name = self.config["train"]["model"]
         save_checkpoint_path = (
             f"{experiments_dir}/checkpoint_{model_name}_step_{self.global_step}.pkl"
