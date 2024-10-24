@@ -332,7 +332,6 @@ class ImprovedDiffusionTrainer(BaseDiffusionTrainer):
                 )
             if len(image_samples) < val_sample_images_num:
                 image_samples[label_name] = generations[0]
-            break
 
         return image_samples, synthetic_images_dir
 
