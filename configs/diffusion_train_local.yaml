@@ -30,7 +30,6 @@ train:
     val_images_per_class: 2
     val_sample_images: 3
 
-
 model_args:
     # loss is embedded into forward diffusion process
     forward_process_args:

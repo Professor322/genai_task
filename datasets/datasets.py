@@ -1,4 +1,3 @@
-from PIL import Image
 from torch.utils.data import Dataset
 from utils.data_utils import make_dataset
 from utils.class_registry import ClassRegistry
@@ -6,6 +5,7 @@ import os
 import glob
 import numpy as np
 import torch
+import cv2
 
 
 datasets_registry = ClassRegistry()
@@ -53,8 +53,8 @@ class Food101Dataset(Dataset):
 
     def __getitem__(self, idx):
         # load image and convert it to RGB
-        image = Image.open(self.image_paths[idx])
-        image = np.array(image.convert("RGB"))
+        image = cv2.imread(self.image_paths[idx])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # normalize image to range [-1, 1]
         image = image.astype(np.float32) / 127.5 - 1
         # then convert to torch tensor
@@ -80,6 +80,6 @@ class ImageFidDataset(Food101Dataset):
         return len(self.image_paths)
 
     def __getitem__(self, idx):
-        image = Image.open(self.image_paths[idx])
-        image = np.array(image.convert("RGB"))
+        image = cv2.imread(self.image_paths[idx])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return torch.tensor(image, dtype=torch.uint8).permute([2, 0, 1])
