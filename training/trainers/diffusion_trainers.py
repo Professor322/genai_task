@@ -265,6 +265,17 @@ class ImprovedDiffusionTrainer(BaseDiffusionTrainer):
         self.step += 1
         return {"train_loss": loss.item()}
 
+    def validation_run(self):
+        validation_checkpoints = self.config["train"]["validation_checkpoints"]
+        for validation_checkpoint in validation_checkpoints:
+            self.config["train"]["checkpoint_path"] = validation_checkpoint
+            self.load_checkpoint()
+            val_metrics_dict, images = self.validate()
+            self.logger.log_val_metrics(val_metrics_dict, step=self.global_step)
+            self.logger.log_batch_of_images(
+                images, step=self.global_step, images_type="validation"
+            )
+
     def save_checkpoint(self):
         experiments_dir = self.config["train"]["checkpoint_save_path"]
         model_name = self.config["train"]["model"]

@@ -33,6 +33,14 @@ class BaseTrainer:
         self.setup_datasets()
         self.setup_dataloaders()
 
+    def setup_validation(self):
+        self.setup_experiment_dir()
+        self.setup_models()
+        self.setup_metrics()
+        self.setup_logger()
+        self.setup_datasets()
+        self.setup_dataloaders()
+
     def setup_inference(self):
         self.setup_experiment_dir()
 
@@ -125,6 +133,10 @@ class BaseTrainer:
 
     @abstractmethod
     def load_checkpoint(self):
+        pass
+
+    @abstractmethod
+    def validation_run(self):
         pass
 
     @torch.no_grad()

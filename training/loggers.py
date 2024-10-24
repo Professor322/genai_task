@@ -12,10 +12,11 @@ class WandbLogger:
     def __init__(self, config, run_id=None):
         wandb.login(key=os.environ["WANDB_KEY"].strip())
         self.run_id = run_id if run_id is not None else wandb.util.generate_id()
+        self.val_run = config["train"]["validation_run"]
         self.wandb_args = {
             "id": self.run_id,
             "project": "genai_task",
-            "name": f"{config['train']['model']}_{self.run_id}",
+            "name": f"{config['train']['model']}_{self.run_id}{'_val_run' if self.val_run is True else ''}",
             "config": config,
         }
 

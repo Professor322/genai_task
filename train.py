@@ -27,5 +27,9 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"Unknown model type {config.exp.model_type}")
 
-    trainer.setup()
-    trainer.training_loop()
+    if config["train"]["validation_run"]:
+        trainer.setup_validation()
+        trainer.validation_run()
+    else:
+        trainer.setup()
+        trainer.training_loop()

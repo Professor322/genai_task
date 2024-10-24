@@ -29,6 +29,13 @@ train:
     val_step: 2
     val_images_per_class: 2
     val_sample_images: 3
+    # crutch to log correct fid and images
+    validation_run: True
+    validation_checkpoints: [
+        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_15000.pkl",
+        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_30000.pkl",
+        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_45000.pkl",
+    ]
 
 model_args:
     # loss is embedded into forward diffusion process
