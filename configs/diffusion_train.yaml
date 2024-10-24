@@ -32,9 +32,9 @@ train:
     # crutch to log correct fid and images
     validation_run: False
     validation_checkpoints: [
-        /content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_15000.pkl
-        /content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_30000.pkl
-        /content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_45000.pkl
+        "/content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_15000.pkl",
+        "/content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_30000.pkl",
+        "/content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_45000.pkl"
     ]
 
 model_args:
