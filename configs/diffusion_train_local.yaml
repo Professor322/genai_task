@@ -30,7 +30,7 @@ train:
     val_images_per_class: 2
     val_sample_images: 3
     # crutch to log correct fid and images
-    validation_run: True
+    validation_run: False
     validation_checkpoints: [
         "/home/kolek/Downloads/checkpoint_improved_diffusion_step_15000.pkl",
         "/home/kolek/Downloads/checkpoint_improved_diffusion_step_30000.pkl",
