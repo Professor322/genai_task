@@ -1,0 +1,60 @@
+exp:
+    exp_dir: experiments
+    device: cuda
+    seed: 777
+    use_wandb: True
+    model_type: diffusion
+
+data:
+    dataset: food101_dataset
+    input_train_dir: /home/kolek/Edu/thesis/data/train
+    input_val_dir: /home/kolek/Edu/thesis/data/test
+    train_batch_size: 8
+    val_batch_size: 8
+    workers: 8
+
+train:
+    trainer: improved_diffusion_trainer
+    model: improved_diffusion
+    diffusion: spaced_diffusion
+    optimizer: adam
+    noise_sampler: uniform_sampler
+    checkpoint_path: /home/kolek/Downloads/checkpoint_improved_diffusion_step_45000.pkl
+    checkpoint_save_path: experiments
+    val_metrics: ["fid"]
+    start_step: 0
+    steps: 300000
+    log_step: 2
+    checkpoint_step: 100
+    val_step: 2
+    val_images_per_class: 1
+    val_sample_images: 0
+
+
+model_args:
+    # loss is embedded into forward diffusion process
+    forward_process_args:
+        sigma_small: False
+        steps: 100
+        noise_schedule: cosine
+        timestep_respacing: ""
+        use_kl: False
+        predict_xstart: False
+        rescale_timesteps: True
+        rescale_learned_sigmas: True
+    reverse_process_args:
+        image_size: 64
+        num_channels: 128
+        num_res_blocks: 2
+        num_heads: 4
+        num_heads_upsample: -1
+        attention_resolutions: "16,8"
+        dropout: 0.0
+        learn_sigma: False
+        class_cond: True
+        use_checkpoint: False
+        use_scale_shift_norm: True
+        num_classes :  101
+
+optimizer_args:
+    lr: 0.0001

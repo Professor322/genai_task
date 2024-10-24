@@ -76,6 +76,7 @@ class ImprovedDiffusionTrainer(BaseDiffusionTrainer):
     def __init__(self, config):
         super().__init__(config)
         self.run_id = None
+        self.optimizer = None
         self.metrics = {}
 
     def __create_model(
@@ -291,16 +292,16 @@ class ImprovedDiffusionTrainer(BaseDiffusionTrainer):
             return
         dict = torch.load(load_checkpoint_path)
         self.model.load_state_dict(dict["model_state_dict"])
-        self.optimizer.load_state_dict(dict["optimizer_state_dict"])
+        # might not be present for inference
+        if self.optimizer is not None:
+            self.optimizer.load_state_dict(dict["optimizer_state_dict"])
         self.diffusion = dict["diffusion"]
         self.noise_sampler = dict["noise_sampler"]
         self.global_step = dict["global_step"]
         self.run_id = dict["run_id"]
 
+    @torch.no_grad()
     def synthesize_images(self):
-        # this function just going to produce 20 images per class
-        # because that is how many images in test per class
-        # and save those in experiment folder
         print("Synthesizing images...")
         experiment_root = self.config["exp"]["exp_dir"]
         synthetic_images_dir = os.path.join(experiment_root, "synthethic")
@@ -327,8 +328,11 @@ class ImprovedDiffusionTrainer(BaseDiffusionTrainer):
             for idx, generation in enumerate(generations):
                 cv2.imwrite(
                     os.path.join(label_dir, f"{idx}.jpg"),
-                    generation,
-                    [cv2.IMWRITE_JPEG_QUALITY, 100],
+                    cv2.cvtColor(generation, cv2.COLOR_RGB2BGR),
+                    [
+                        cv2.IMWRITE_JPEG_QUALITY,
+                        100,
+                    ],
                 )
             if len(image_samples) < val_sample_images_num:
                 image_samples[label_name] = generations[0]

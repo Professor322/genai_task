@@ -28,4 +28,5 @@ if __name__ == "__main__":
         raise ValueError(f"Unknown model type {config.exp.model_type}")
 
     trainer.setup_inference()
-    trainer.inference()
+    _, path = trainer.synthesize_images()
+    print(f"Images saved to {path}")
