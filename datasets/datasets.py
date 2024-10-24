@@ -1,4 +1,5 @@
 from torch.utils.data import Dataset
+from PIL import Image
 from utils.data_utils import make_dataset
 from utils.class_registry import ClassRegistry
 import os
