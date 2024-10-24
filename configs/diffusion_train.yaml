@@ -1,5 +1,5 @@
 exp:
-    exp_dir: /content/drive/MyDrive/experiments
+    exp_dir: /content/experiments
     device: cuda
     seed: 777
     use_wandb: True
