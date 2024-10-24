@@ -37,6 +37,11 @@ train:
         "/content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_45000.pkl"
     ]
 
+# this configuration uses rescaled mse as a learning objective
+# if we enable learn_sigma, then we will use hybrid loss, presented
+# in the paper MSE + VLB
+# enabling KL will just learn variational lower bound (VLB)
+
 model_args:
     # loss is embedded into forward diffusion process
     forward_process_args:
