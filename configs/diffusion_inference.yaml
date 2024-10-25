@@ -19,7 +19,7 @@ train:
     diffusion: spaced_diffusion
     optimizer: adam
     noise_sampler: uniform_sampler
-    checkpoint_path: /home/kolek/Downloads/checkpoint_improved_diffusion_step_45000.pkl
+    checkpoint_path: ""
     checkpoint_save_path: experiments
     val_metrics: ["fid"]
     start_step: 0
@@ -29,10 +29,17 @@ train:
     val_step: 2
     val_images_per_class: 1
     val_sample_images: 0
+    validation_run: False
+    validation_checkpoints: [
+        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_15000.pkl",
+        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_30000.pkl",
+        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_45000.pkl",
+    ]
 
 
 model_args:
     # loss is embedded into forward diffusion process
+    learn_sigma: True
     forward_process_args:
         sigma_small: False
         steps: 100
@@ -50,7 +57,6 @@ model_args:
         num_heads_upsample: -1
         attention_resolutions: "16,8"
         dropout: 0.0
-        learn_sigma: False
         class_cond: True
         use_checkpoint: False
         use_scale_shift_norm: True

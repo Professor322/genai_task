@@ -172,11 +172,13 @@ class ImprovedDiffusionTrainer(BaseDiffusionTrainer):
     def setup_models(self):
         # create model for reconstruction
         self.model = self.__create_model(
-            **self.config["model_args"]["reverse_process_args"]
+            **self.config["model_args"]["reverse_process_args"],
+            learn_sigma=self.config["model_args"]["learn_sigma"],
         ).to(self.device)
         # create diffusion process
         self.diffusion = self.__create_gaussian_diffusion(
-            **self.config["model_args"]["forward_process_args"]
+            **self.config["model_args"]["forward_process_args"],
+            learn_sigma=self.config["model_args"]["learn_sigma"],
         )
         # create noise sampler
         self.noise_sampler = diffusion_models_registry[

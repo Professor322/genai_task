@@ -26,9 +26,9 @@ train:
     steps: 300000
     log_step: 2
     checkpoint_step: 100
-    val_step: 2
+    val_step: 10
     val_images_per_class: 2
-    val_sample_images: 3
+    val_sample_images: 1
     # crutch to log correct fid and images
     validation_run: False
     validation_checkpoints: [
@@ -44,6 +44,7 @@ train:
 
 model_args:
     # loss is embedded into forward diffusion process
+    learn_sigma: True
     forward_process_args:
         sigma_small: False
         steps: 100
@@ -61,7 +62,6 @@ model_args:
         num_heads_upsample: -1
         attention_resolutions: "16,8"
         dropout: 0.0
-        learn_sigma: False
         class_cond: True
         use_checkpoint: False
         use_scale_shift_norm: True

@@ -44,6 +44,7 @@ train:
 
 model_args:
     # loss is embedded into forward diffusion process
+    learn_sigma: True
     forward_process_args:
         sigma_small: False
         steps: 200
@@ -61,7 +62,6 @@ model_args:
         num_heads_upsample: -1
         attention_resolutions: "16,8"
         dropout: 0.0
-        learn_sigma: False
         class_cond: True
         use_checkpoint: False
         use_scale_shift_norm: True
