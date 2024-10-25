@@ -44,7 +44,7 @@ train:
 
 model_args:
     # loss is embedded into forward diffusion process
-    learn_sigma: True
+    learn_sigma: False
     forward_process_args:
         sigma_small: False
         steps: 100
