@@ -8,7 +8,7 @@ exp:
 data:
     dataset: food101_dataset
     input_train_dir: <change_to_your_train_dir>
-    input_val_dir: <change_to_your_train_dir>
+    input_val_dir: <change_to_your_test_dir>
     train_batch_size: 8
     val_batch_size: 8
     workers: 8
