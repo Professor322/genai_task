@@ -7,8 +7,8 @@ exp:
 
 data:
     dataset: food101_dataset
-    input_train_dir: /home/kolek/Edu/thesis/data/train
-    input_val_dir: /home/kolek/Edu/thesis/data/test
+    input_train_dir: <change_to_your_train_dir>
+    input_val_dir: <change_to_your_train_dir>
     train_batch_size: 8
     val_batch_size: 8
     workers: 8
@@ -29,19 +29,16 @@ train:
     val_step: 10
     val_images_per_class: 2
     val_sample_images: 1
-    # crutch to log correct fid and images
+    # there is a capability to evaluate certain checkpoints
+    # mainly it was done to plot nice graphs and upload generated
+    # images in wandb
     validation_run: False
-    validation_checkpoints: [
-        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_15000.pkl",
-        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_30000.pkl",
-        "/home/kolek/Downloads/checkpoint_improved_diffusion_step_45000.pkl",
-    ]
+    validation_checkpoints: []
 
 # this configuration uses rescaled mse as a learning objective
 # if we enable learn_sigma, then we will use hybrid loss, presented
 # in the paper MSE + VLB
 # enabling KL will just learn variational lower bound (VLB)
-
 model_args:
     # loss is embedded into forward diffusion process
     learn_sigma: False

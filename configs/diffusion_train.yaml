@@ -1,3 +1,4 @@
+# this configuration file was used to train models in collab
 exp:
     exp_dir: /content/experiments
     device: cuda
@@ -29,19 +30,16 @@ train:
     val_step: 15000
     val_images_per_class: 20
     val_sample_images: 5
-    # crutch to log correct fid and images
+    # there is a capability to evaluate certain checkpoints
+    # mainly it was done to plot nice graphs and upload generated
+    # images in wandb
     validation_run: False
-    validation_checkpoints: [
-        "/content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_15000.pkl",
-        "/content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_30000.pkl",
-        "/content/drive/MyDrive/checkpoints/checkpoint_improved_diffusion_step_45000.pkl"
-    ]
+    validation_checkpoints: []
 
 # this configuration uses rescaled mse as a learning objective
 # if we enable learn_sigma, then we will use hybrid loss, presented
 # in the paper MSE + VLB
 # enabling KL will just learn variational lower bound (VLB)
-
 model_args:
     # loss is embedded into forward diffusion process
     learn_sigma: False
