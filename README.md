@@ -15,13 +15,24 @@ pip install -r requirements.txt
 
 ## Обучение
 ```
-python3 train.py exp.config_path=path/to/train/config.yaml
+python3 inference.py exp.config_path=<path_to_train_config> \
+                     exp.use_wandb=False \
+                     data.input_train_dir=<path_to_train> \
+                     data.input_val_dir=<path_to_val> \ 
+                     train.checkpoint_path=<path_to_checkpoint> \ 
+                     model_args.learn_sigma=<True in case of VLB + MSE, False otherwise>
 ```
 
 ## Применение
 ```
-python3 inference.py exp.config_path=path/to/inference/config.yaml train.checkpoint_path="path/to/ckpt"
+python3 inference.py exp.config_path=<path_to_inference_config> \
+                     exp.use_wandb=False \
+                     data.input_train_dir=<path_to_train> \
+                     data.input_val_dir=<path_to_val> \ 
+                     train.checkpoint_path=<path_to_checkpoint> \ 
+                     model_args.learn_sigma=<True in case of VLB + MSE, False otherwise>
 ```
+Инференс модели сгенерирует изображения для каждого класса и поместит их в директорию указанную в `exp.exp_dir`
 
 ## Чекпоинты
 

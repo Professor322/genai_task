@@ -33,11 +33,23 @@ class WandbLogger:
         ]
         return wandb.log({image_type: wandb_images}, step=step)
 
+class LocalLogger:
+    @staticmethod
+    def log_values(values_dict: dict, step: int):
+        print(f">> {values_dict} at iteration: {step}")
+
+    @staticmethod
+    def log_images(images: dict, step: int, image_type: str):
+        return
+
 
 @loggers_registry.add_to_registry(name="training_logger")
 class TrainingLogger:
     def __init__(self, config, run_id=None):
-        self.logger = WandbLogger(config, run_id=run_id)
+        if config['exp']['use_wandb']:
+            self.logger = WandbLogger(config, run_id=run_id)
+        else:
+            self.logger = LocalLogger()
         self.losses_memory = defaultdict(list)
 
     def log_train_losses(self, step: int):
